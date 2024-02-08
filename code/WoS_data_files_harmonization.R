@@ -59,7 +59,7 @@ clean_wos <- wos_data %>%
 
 # clean_wos %>% write_csv(here('data', 'WoS', 'clean_wos.csv'))
 
-clean_wos <- read_csv(here('data', 'WoS', 'clean_wos.csv'))
+# clean_wos <- read_csv(here('data', 'WoS', 'clean_wos.csv'))
 
 # adding id to the each paper
 
@@ -174,3 +174,10 @@ wos_full <- wos_paper %>%
 # uncomment if needed
 # wos_full %>%
 #   write_csv(here('data', 'full_joined_wos_data.csv'))
+
+# ns <- map( c('wos_paper', 'wos_affiliations', 'wos_kw', 'wos_sc'), function(x) paste0(here('data', 'clean_data'),'/', x,  '.csv'))
+# 
+# xs <- list(wos_paper, wos_affiliations, wos_kw, wos_sc)
+#   
+# 
+# map2(xs, ns, function(x,y) x %>% write_csv(y))
