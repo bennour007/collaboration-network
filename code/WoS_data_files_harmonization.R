@@ -54,7 +54,9 @@ wos_data <- list_of_data_frames %>%
 
 clean_wos <- wos_data %>%
   distinct(doi, .keep_all = T) %>%
-  filter(!is.na(authors) & !is.na(publication_year) & !is.na(author_keywords) & !is.na(keywords_plus) & !is.na(author_affiliation) )
+  filter(!is.na(authors) & !is.na(publication_year) & !is.na(author_keywords) & 
+         !is.na(keywords_plus) & !is.na(author_affiliation) & !is.na(wo_s_categories) &
+         !(publication_year %in% c(25, 30, 64)))
 
 
 # clean_wos %>% write_csv(here('data', 'WoS', 'clean_wos.csv'))
@@ -148,7 +150,7 @@ wos_paper <- wos_ided %>%
 ## by subject category
 
 wos_sc <- wos_ided %>% 
-  select(rowid, subject_category) %>% 
+  select(rowid, publication_year, subject_category) %>% 
   separate_rows(subject_category, sep = ";\\s*")
 
 
