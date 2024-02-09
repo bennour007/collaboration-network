@@ -68,12 +68,12 @@ tidy_relatedness <- cooc_list %>%
       as_tibble() %>%  
       mutate(sc_1 = colnames(x))%>% 
       select(sc_1, everything()) %>% 
-      pivot_longer(2:last_col(), names_to = 'sc_2', values_to = 'relatedness') 
-      # mutate(relatedness = if_else(relatedness == 0, NA, relatedness)) NOT SURE ABOUT THIS
+      pivot_longer(2:last_col(), names_to = 'sc_2', values_to = 'relatedness') %>% 
+      mutate(relatedness = if_else(relatedness == 0, NA, relatedness)) 
   })
 
-tidy_relatedness[[2]] %>% 
-  write_csv('tmp.csv')
+# tidy_relatedness[[2]] %>%
+#   write_csv('tmp.csv')
 
 graph <- graph_from_data_frame(d = tidy_relatedness[[1]], directed = FALSE, vertices = NULL)
 

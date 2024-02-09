@@ -157,7 +157,7 @@ wos_sc <- wos_ided %>%
 ## by keywords
 
 wos_kw <- wos_ided %>% 
-  select(rowid, author_keywords) %>% 
+  select(rowid, publication_year, author_keywords) %>% 
   separate_rows(author_keywords, sep = ";\\s*")
 
 
