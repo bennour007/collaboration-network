@@ -14,12 +14,12 @@ wos_sc_n <- wos_sc %>%
 
 
 subjects_pairs <- wos_sc_n %>% 
-  mutate(sc_pairs = list(subject_category)) %>% 
-  unnest(sc_pairs) %>% 
-  ungroup() %>%
-  # filter(if_any(n_subjects,  function(x) x == 1))
-  filter(subject_category != sc_pairs )
-  
+mutate(sc_pairs = list(subject_category)) %>% 
+unnest(sc_pairs) %>% 
+ungroup() %>%
+# filter(if_any(n_subjects,  function(x) x == 1))
+filter(subject_category != sc_pairs )
+  # devtools::install_github("PABalland/EconGeo", force = T)
   
 
 

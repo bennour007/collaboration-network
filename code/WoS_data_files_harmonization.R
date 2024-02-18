@@ -20,10 +20,10 @@ list_of_data_frames <- map(txt_files, read_tsv)
 
 
 # Define the selected variables and new names in independent vectors
-selected_vars <- c("TI", "DT", "PT", "PY", "DI", "AU", "C1", "DE", "ID", "WC", "SC", "AB", "TC", "SO")
+selected_vars <- c("TI", "DT", "PT", "PY", "DI", "AU", "C1", "C3", "DE", "ID", "WC", "WE", "SC", "AB", "TC", "SO")
 new_names <- c("DocumentTitle", "DocumentType", "PublicationType", "PublicationYear", "DOI",
-               "Authors", "AuthorAffiliation", "AuthorKeywords", "KeywordsPlus",
-               "WoSCategories", "SubjectCategory", "Abstract", "TimesCited", "SourcePublication")
+               "Authors", "AuthorAffiliation", "AuthorAffiliation2", "AuthorKeywords", "KeywordsPlus",
+               "WoSCategories", "ExpandedCategories", "SubjectCategory", "Abstract", "TimesCited", "SourcePublication")
 
 # Define a function to filter and rename dataset columns
 filter_and_rename <- function(dataset) {
@@ -96,46 +96,30 @@ wos_ided <- clean_wos %>%
 #     affiliation = str_trim(str_remove(affiliation, "\\[.*?\\]")) # Remove authors and trim spaces from affiliation
 #   ) %>% View()
 
-# Define a simplified and vectorized function
-parse_authors_and_affiliations <- function(author_affiliation) {
-  # Split the entire string by the pattern that indicates a new author-affiliation pair
-  pairs <- str_split(author_affiliation, "; (?=\\[)", simplify = TRUE)
-  
-  # Initialize vectors to store extracted data
-  authors <- character()
-  affiliations <- character()
-  countries <- character()
-  
-  for (pair in pairs) {
-    # Extract authors (assuming they are within brackets)
-    author <- str_extract(pair, "\\[.*?\\]") %>% str_remove_all("\\[|\\]")
-    # Split affiliation and country by the last comma
-    aff_country <- str_extract(pair, "(?<=\\]).*$") %>% 
-      str_split(", (?=[^,]+$)", n = 2, simplify = TRUE)
-    # Append to vectors
-    authors <- c(authors, author)
-    affiliations <- c(affiliations, aff_country[1])
-    countries <- c(countries, aff_country[2])
-  }
-  
-  # Return a tibble with the parsed data
-  tibble(author = authors, affiliation = affiliations, country = countries)
-}
 
+# THIS CODE ALLOWS TO EXTRACT THE INSTITUTIONS WITHIN THE AFF2 FROM C3 COLUMN
+# THIS MEANS THAT WE WILL HAVE INFORMATION LOSS SINCE AFF2 DOESN'T NECESSARILY
+# CONTAIN THE FULL INFORMATION FROM AFF1
+################################################################################
+# THIS IS A MAJOR ISSUE THAT SHOULD BE ADDRESSED IN LATER STAGES OF THE RESEARCH
+################################################################################
 
-# Apply the function to each row and unnest the result to create a long format dataframe
-
-## by affiliation and country
-wos_affiliations <- wos_ided %>%
-  select(rowid, author_affiliation) %>% 
-  rowwise() %>%
-  mutate(parsed = list(parse_authors_and_affiliations(author_affiliation))) %>%
-  unnest(parsed) 
-
-wos_affiliations <- wos_affiliations%>% 
-  select(-author_affiliation)
-
-
+wos_aff <- wos_ided %>%
+  select(rowid, author_affiliation, authors, author_affiliation2)%>%
+  separate_rows(author_affiliation2, sep = ";\\s*")
+  # UNTILL WE FIGURE OUT HOW TO HARMONIZE AUTHOR GROUPS AND COUNTRIES
+  # WE DON'T REALLY NEED THIS 
+  # mutate(
+  #   countries = sapply(str_extract_all(author_affiliation, "(?<=,\\s)[^,;\\[]+(?=(; \\[|$))"), 
+  #                      function(x) paste(x, collapse = "| ")),
+  #   # countries = sapply(countries, clean_countries),
+  #   author_groups = sapply(str_extract_all(author_affiliation, "\\[.*?\\]"), 
+  #                          function(x) paste(x, collapse = "| "))
+  # ) %>% 
+  # mutate(
+  #   institutions = gsub(";", "|", author_affiliation2)
+  # ) %>%
+  # separate_rows(institutions, sep = "\\|")
 
 ## by main paper characteristics
 
@@ -180,6 +164,6 @@ wos_full <- wos_paper %>%
 # ns <- map( c('wos_paper', 'wos_affiliations', 'wos_kw', 'wos_sc'), function(x) paste0(here('data', 'clean_data'),'/', x,  '.csv'))
 # 
 # xs <- list(wos_paper, wos_affiliations, wos_kw, wos_sc)
-#   
+# 
 # 
 # map2(xs, ns, function(x,y) x %>% write_csv(y))
