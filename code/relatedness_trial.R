@@ -140,8 +140,11 @@ streamline_indicators <- function(x){
     get.list()
   
   ## COMPUTE KNOWLEDGE COMPLEXITY FOR EACH INSTITUTION IN A TIBBLE
-  # KCI <- tibble(int = rownames(rcamat), kci = kci)
-  list(rcamat = rcamat, relmat = relmat, rel_density = rel_density)
+  KCI <- tibble(instituion = rownames(rcamat), KCI = KCI(rcamat, RCA = F))
+  
+  
+  ## RETURN LIST ITEMS
+  list(rcamat = rcamat, relmat = relmat, rel_density = rel_density, KCI = KCI)
 
 }
 
