@@ -49,12 +49,12 @@ wos_data <- list_of_data_frames %>%
 # ################################################################################
 # ################################################################################
 # # CLEAN DATA
-# 
+#
 # clean_wos <- read_csv(here('data', 'WoS', 'clean_wos.csv'))
 
 clean_wos <- wos_data %>%
   distinct(doi, .keep_all = T) %>%
-  filter(!is.na(authors) & !is.na(publication_year) & !is.na(author_keywords) & 
+  filter(!is.na(authors) & !is.na(publication_year) & !is.na(author_keywords) &
          !is.na(keywords_plus) & !is.na(author_affiliation) & !is.na(wo_s_categories) &
          !(publication_year %in% c(25, 30, 64)))
 
@@ -65,18 +65,18 @@ clean_wos <- wos_data %>%
 
 # adding id to the each paper
 
-wos_ided <- clean_wos %>% 
+wos_ided <- clean_wos %>%
   rowid_to_column()
 
 ################################################################################
 ################################################################################
 ################################################################################
-# DIVIDE DATA 
+# DIVIDE DATA
 
 
 ################################################################################
 # ## by authors and affiliation:
-# THERE'S A POTENTIAL ISSUE WITH AUTHORS BEING AFFILIATED WITH MULTIPLE 
+# THERE'S A POTENTIAL ISSUE WITH AUTHORS BEING AFFILIATED WITH MULTIPLE
 # ENTITIES SIMULTANEUOUSLY FOR A SINGLE PAPER
 # NOT SURE HOW TO MITIGATE THIS.
 ################################################################################
@@ -84,8 +84,8 @@ wos_ided <- clean_wos %>%
 
 
 
-# wos_ided %>% 
-#   select(rowid, publication_year, author_affiliation, document_title, doi) %>% 
+# wos_ided %>%
+#   select(rowid, publication_year, author_affiliation, document_title, doi) %>%
 #   mutate(
 #     authors = str_extract(author_affiliation, "\\[.*?\\]"), # Extract authors
 #     affiliation = str_extract(author_affiliation, "(?<=\\]).+?(?=, [^,]+$)"), # Extract affiliation
@@ -108,14 +108,14 @@ wos_aff <- wos_ided %>%
   select(rowid, author_affiliation, authors, author_affiliation2)%>%
   separate_rows(author_affiliation2, sep = ";\\s*")
   # UNTILL WE FIGURE OUT HOW TO HARMONIZE AUTHOR GROUPS AND COUNTRIES
-  # WE DON'T REALLY NEED THIS 
+  # WE DON'T REALLY NEED THIS
   # mutate(
-  #   countries = sapply(str_extract_all(author_affiliation, "(?<=,\\s)[^,;\\[]+(?=(; \\[|$))"), 
+  #   countries = sapply(str_extract_all(author_affiliation, "(?<=,\\s)[^,;\\[]+(?=(; \\[|$))"),
   #                      function(x) paste(x, collapse = "| ")),
   #   # countries = sapply(countries, clean_countries),
-  #   author_groups = sapply(str_extract_all(author_affiliation, "\\[.*?\\]"), 
+  #   author_groups = sapply(str_extract_all(author_affiliation, "\\[.*?\\]"),
   #                          function(x) paste(x, collapse = "| "))
-  # ) %>% 
+  # ) %>%
   # mutate(
   #   institutions = gsub(";", "|", author_affiliation2)
   # ) %>%
@@ -124,24 +124,24 @@ wos_aff <- wos_ided %>%
 ## by main paper characteristics
 
 
-wos_paper <- wos_ided %>% 
+wos_paper <- wos_ided %>%
   select(
-    rowid, publication_year, document_title, document_type, publication_type, 
+    rowid, publication_year, document_title, document_type, publication_type,
     source_publication, times_cited
   )
 
 
 ## by subject category
 
-wos_sc <- wos_ided %>% 
-  select(rowid, publication_year, subject_category) %>% 
+wos_sc <- wos_ided %>%
+  select(rowid, publication_year, subject_category) %>%
   separate_rows(subject_category, sep = ";\\s*")
 
 
 ## by keywords
 
-wos_kw <- wos_ided %>% 
-  select(rowid, publication_year, author_keywords) %>% 
+wos_kw <- wos_ided %>%
+  select(rowid, publication_year, author_keywords) %>%
   separate_rows(author_keywords, sep = ";\\s*")
 
 
