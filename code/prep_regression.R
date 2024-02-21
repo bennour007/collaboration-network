@@ -36,7 +36,7 @@ all_merged_regions <- all_merged %>%
       City == "Veszprem" ~ "HU222",
       City == "Nyiregyhaza" ~ "HU323",
       City == "Sopron" ~ "HU221",
-      City == "Martonvásár" ~ "HU212", # Assuming it falls under Fejér's NUTS3 code for example
+      City == "Martonvasar" ~ "HU212", # Assuming it falls under Fejér's NUTS3 code for example
       City == "Szeged" ~ "HU333",
       City == "Tihany" ~ "HU222", # Assuming it falls under Veszprém's NUTS3 code as an example
       TRUE ~ "Unknown" # Fallback option
@@ -44,7 +44,54 @@ all_merged_regions <- all_merged %>%
   )
 
 
+#### read eurostat vars and join them with the data 
 
 
 
+# Set the directory containing the CSV files
+directory_path <- "data/eurostat"
 
+# List all CSV files in the directory
+csv_files <- list.files(path = directory_path, pattern = "\\.csv$", full.names = TRUE)
+# Read all CSV files and store them in a list
+eurostat_data_list <- map(csv_files, function(x){ read_csv(x) %>% select(- freq) %>% janitor::clean_names()}) 
+
+eurostat_data_long <- eurostat_data_list %>% 
+  map(
+    function(x){
+      x %>% 
+        mutate(
+          across(
+            x2013:x2022,
+            as.numeric
+          )
+        ) %>% 
+        pivot_longer(x2013:x2022, names_to = 'year', values_to = 'es_value') 
+    }
+  ) 
+
+eurostat_data_long[[1]] <- eurostat_data_long[[1]]%>% 
+  mutate(indic_ur = case_when(
+    indic_ur == "TE1026V" ~ "num_students",
+    indic_ur == "TE1026I" ~ "share_students",
+    indic_ur == "DE1001V" ~ "population",
+    TRUE ~ indic_ur # Keeps the original value if none of the conditions above are met
+  ))
+
+eurostat_data_long[[3]] <- eurostat_data_long[[3]] %>% 
+  mutate(indic_ur = case_when(
+    indic_ur == "DE1001V" ~ "population",
+    TRUE ~ indic_ur # Keeps the original value if none of the conditions above are met
+  ))
+
+
+all_merged_regions %>% 
+  left_join(eurostat_data_long[[1]], by = c())
+
+
+
+all_merged_regions %>% 
+  ggplot() + 
+  geom_histogram(
+    aes(x = log(KCI))
+  )
