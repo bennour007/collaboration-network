@@ -151,10 +151,10 @@ wos_kw <- wos_ided %>%
 ################################################################################
 
 
-wos_full <- wos_paper %>% 
-  left_join(wos_sc) %>% 
-  left_join(wos_kw) %>% 
-  left_join(wos_affiliations)
+# wos_full <- wos_paper %>% 
+#   left_join(wos_sc) %>% 
+#   left_join(wos_kw) %>% 
+#   left_join(wos_affiliations)
 
 
 # uncomment if needed

@@ -185,6 +185,10 @@ streamline_indicators <- function(x){
   rcamat <- RCA(matrixx, binary = T)
   cooc <- co.occurrence(t(rcamat))
   
+  ## Add RCA list with full values to be used later
+  rcalist <- get.list(RCA(matrixx, binary = F))
+  colnames(rcalist)[3] <- 'rca'
+  
   ## COMPUTE RELATEDNESS AND TRANSFORM AS BINARY
   relmat <- relatedness(cooc)
   relmat[relmat < 1] <- 0
@@ -202,7 +206,7 @@ streamline_indicators <- function(x){
   
   
   ## RETURN LIST ITEMS
-  list(rcamat = rcamat, relmat = relmat, rel_density = rel_density, KCI = KCI, TCI = TCI)
+  list(rcalist = rcalist, rcamat = rcamat, relmat = relmat, rel_density = rel_density, KCI = KCI, TCI = TCI)
 
 }
 
@@ -292,46 +296,57 @@ entry_2013_2014 <- entry.list(tmp$`2013`$rcamat, tmp$`2014`$rcamat) %>%
   )
 
 merged_2023_2024 <- merge(entry_2023_2024, tmp$`2024`$rel_density, by = c("Region", "Industry"))
+merged_2023_2024 <- merge(merged_2023_2024, tmp$`2024`$rcalist, by = c("Region", "Industry"))
 merged_2023_2024 <- merge(merged_2023_2024, tmp$`2024`$KCI, by = "Region")
 merged_2023_2024 <- merge(merged_2023_2024, tmp$`2024`$TCI, by = "Industry")
 
 merged_2022_2023 <- merge(entry_2022_2023, tmp$`2023`$rel_density, by = c("Region", "Industry"))
+merged_2022_2023 <- merge(merged_2022_2023, tmp$`2023`$rcalist, by = c("Region", "Industry"))
 merged_2022_2023 <- merge(merged_2022_2023, tmp$`2023`$KCI, by = "Region")
 merged_2022_2023 <- merge(merged_2022_2023, tmp$`2023`$TCI, by = "Industry")
 
 merged_2021_2022 <- merge(entry_2021_2022, tmp$`2022`$rel_density, by = c("Region", "Industry"))
+merged_2021_2022 <- merge(merged_2021_2022, tmp$`2022`$rcalist, by = c("Region", "Industry"))
 merged_2021_2022 <- merge(merged_2021_2022, tmp$`2022`$KCI, by = "Region")
 merged_2021_2022 <- merge(merged_2021_2022, tmp$`2022`$TCI, by = "Industry")
 
 merged_2020_2021 <- merge(entry_2020_2021, tmp$`2021`$rel_density, by = c("Region", "Industry"))
+merged_2020_2021 <- merge(merged_2020_2021, tmp$`2021`$rcalist, by = c("Region", "Industry"))
 merged_2020_2021 <- merge(merged_2020_2021, tmp$`2021`$KCI, by = "Region")
 merged_2020_2021 <- merge(merged_2020_2021, tmp$`2021`$TCI, by = "Industry")
 
 merged_2019_2020 <- merge(entry_2019_2020, tmp$`2020`$rel_density, by = c("Region", "Industry"))
+merged_2019_2020 <- merge(merged_2019_2020, tmp$`2020`$rcalist, by = c("Region", "Industry"))
 merged_2019_2020 <- merge(merged_2019_2020, tmp$`2020`$KCI, by = "Region")
 merged_2019_2020 <- merge(merged_2019_2020, tmp$`2020`$TCI, by = "Industry")
 
 merged_2018_2019 <- merge(entry_2018_2019, tmp$`2019`$rel_density, by = c("Region", "Industry"))
+merged_2018_2019 <- merge(merged_2018_2019, tmp$`2019`$rcalist, by = c("Region", "Industry"))
 merged_2018_2019 <- merge(merged_2018_2019, tmp$`2019`$KCI, by = "Region")
 merged_2018_2019 <- merge(merged_2018_2019, tmp$`2019`$TCI, by = "Industry")
 
 merged_2017_2018 <- merge(entry_2017_2018, tmp$`2018`$rel_density, by = c("Region", "Industry"))
+merged_2017_2018 <- merge(merged_2017_2018, tmp$`2018`$rcalist, by = c("Region", "Industry"))
 merged_2017_2018 <- merge(merged_2017_2018, tmp$`2018`$KCI, by = "Region")
 merged_2017_2018 <- merge(merged_2017_2018, tmp$`2018`$TCI, by = "Industry")
 
 merged_2016_2017 <- merge(entry_2016_2017, tmp$`2017`$rel_density, by = c("Region", "Industry"))
+merged_2016_2017 <- merge(merged_2016_2017, tmp$`2017`$rcalist, by = c("Region", "Industry"))
 merged_2016_2017 <- merge(merged_2016_2017, tmp$`2017`$KCI, by = "Region")
 merged_2016_2017 <- merge(merged_2016_2017, tmp$`2017`$TCI, by = "Industry")
 
 merged_2015_2016 <- merge(entry_2015_2016, tmp$`2016`$rel_density, by = c("Region", "Industry"))
+merged_2015_2016 <- merge(merged_2015_2016, tmp$`2016`$rcalist, by = c("Region", "Industry"))
 merged_2015_2016 <- merge(merged_2015_2016, tmp$`2016`$KCI, by = "Region")
 merged_2015_2016 <- merge(merged_2015_2016, tmp$`2016`$TCI, by = "Industry")
 
 merged_2014_2015 <- merge(entry_2014_2015, tmp$`2015`$rel_density, by = c("Region", "Industry"))
+merged_2014_2015 <- merge(merged_2014_2015, tmp$`2015`$rcalist, by = c("Region", "Industry"))
 merged_2014_2015 <- merge(merged_2014_2015, tmp$`2015`$KCI, by = "Region")
 merged_2014_2015 <- merge(merged_2014_2015, tmp$`2015`$TCI, by = "Industry")
 
 merged_2013_2014 <- merge(entry_2013_2014, tmp$`2014`$rel_density, by = c("Region", "Industry"))
+merged_2013_2014 <- merge(merged_2013_2014, tmp$`2014`$rcalist, by = c("Region", "Industry"))
 merged_2013_2014 <- merge(merged_2013_2014, tmp$`2014`$KCI, by = "Region")
 merged_2013_2014 <- merge(merged_2013_2014, tmp$`2014`$TCI, by = "Industry")
 

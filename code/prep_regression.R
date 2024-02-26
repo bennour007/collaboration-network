@@ -43,6 +43,21 @@ all_merged_regions <- all_merged %>%
     )
   )
 
+publication_p_year <- wos_aff %>% 
+  filter(author_affiliation2 %in% reference_institutions) %>% 
+  left_join(wos_paper[,1:2]) %>%
+  left_join(wos_sc) %>% 
+  select(rowid, author_affiliation2, publication_year, subject_category) %>% 
+  count(author_affiliation2, publication_year, subject_category, sort = T, name = "n_pub") %>% 
+  mutate(
+    author_affiliation2 = as_factor(author_affiliation2)
+  ) %>% 
+  dplyr::rename(
+    Region = author_affiliation2,
+    period = publication_year,
+    Industry = subject_category
+  )
+
 
 #### read eurostat vars and join them with the data 
 
@@ -66,32 +81,92 @@ eurostat_data_long <- eurostat_data_list %>%
             as.numeric
           )
         ) %>% 
-        pivot_longer(x2013:x2022, names_to = 'year', values_to = 'es_value') 
+        pivot_longer(x2013:x2022, names_to = 'year', values_to = 'es_value') %>% 
+        mutate(year = str_remove(year, 'x'))
     }
   ) 
 
+# Create a named vector where the names are the codes and the values are the city names
+city_names <- c(
+  HU001C = "Budapest",
+  HU002C = "Miskolc",
+  HU003C = "Nyiregyhaza",
+  HU004C = "Pecs",
+  HU005C = "Debrecen",
+  HU006C = "Szeged",
+  HU007C = "Gyor",
+  HU008C = "Kecskemet",
+  HU009C = "Szekesfehervar",
+  HU010C = "Szombathely",
+  HU011C = "Szolnok",
+  HU012C = "Tatabanya",
+  HU013C = "Veszprem",
+  HU014C = "Bekescsaba",
+  HU015C = "Kaposvar",
+  HU016C = "Eger",
+  HU017C = "Dunaujvaros",
+  HU018C = "Zalaegerszeg",
+  HU019C = "Sopron"
+)
+
+# Assume your data frame is named 'df' and the column with the city codes is named 'cities_time_period'
+eurostat_data_long[[3]] <- eurostat_data_long[[3]] %>%
+  mutate(City = city_names[cities_time_period]) %>% 
+  select(-cities_time_period)
+
+eurostat_data_long[[1]] <- eurostat_data_long[[1]] %>%
+  mutate(City = city_names[cities_time_period]) %>% 
+  select(-cities_time_period)
+
+
 eurostat_data_long[[1]] <- eurostat_data_long[[1]]%>% 
-  mutate(indic_ur = case_when(
-    indic_ur == "TE1026V" ~ "num_students",
-    indic_ur == "TE1026I" ~ "share_students",
-    indic_ur == "DE1001V" ~ "population",
-    TRUE ~ indic_ur # Keeps the original value if none of the conditions above are met
-  ))
+  mutate(
+    indic_ur = case_when(
+      indic_ur == "TE1026V" ~ "num_students",
+      indic_ur == "TE1026I" ~ "share_students",
+      indic_ur == "DE1001V" ~ "population",
+      TRUE ~ indic_ur # Keeps the original value if none of the conditions above are met
+    )
+  ) %>% 
+  dplyr::rename(indc_students = indic_ur, value_students = es_value)
 
 eurostat_data_long[[3]] <- eurostat_data_long[[3]] %>% 
   mutate(indic_ur = case_when(
     indic_ur == "DE1001V" ~ "population",
     TRUE ~ indic_ur # Keeps the original value if none of the conditions above are met
-  ))
+  ))%>% 
+  dplyr::rename(indc_pop = indic_ur, value_pop = es_value)
+
+eurostat_eco_wide <- eurostat_data_long[[2]] %>% 
+  pivot_wider(names_from = 'unit', values_from = 'es_value' ) %>% 
+  filter(geo_time_period %in% c(all_merged_regions %>% pull(NUTS3) %>%  unique())) %>% 
+  dplyr::rename(NUTS3 = geo_time_period) %>% 
+  mutate(year = as.numeric(year))
 
 
-all_merged_regions %>% 
-  left_join(eurostat_data_long[[1]], by = c())
 
+eurostat_merged <- eurostat_data_long[[1]] %>% 
+  left_join(eurostat_data_long[[3]], by = c('City', 'year')) %>% 
+  pivot_wider(names_from = indc_students, values_from = value_students) %>% 
+  pivot_wider(names_from = indc_pop, values_from = value_pop) %>% 
+  mutate(year = as.numeric(year))
+  
 
-
-all_merged_regions %>% 
-  ggplot() + 
-  geom_histogram(
-    aes(x = log(KCI))
+data_full <- all_merged_regions %>% 
+  group_by(City, period) %>% 
+  left_join(eurostat_merged, by = c('City' = 'City', 'period' = 'year')) %>% 
+  left_join(eurostat_eco_wide, by = c('NUTS3' = 'NUTS3', 'period' = 'year')) %>% 
+  left_join(publication_p_year) %>% 
+  dplyr::rename(
+    pps = PPS_EU27_2020_HAB,
+    gdp = MIO_EUR,
+    gdp_c = EUR_HAB
   )
+
+# 
+# 
+# all_merged_regions %>% 
+#   ggplot() + 
+#   geom_histogram(
+#     aes(x = log(KCI))
+#   )
